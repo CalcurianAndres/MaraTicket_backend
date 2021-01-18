@@ -1,0 +1,4 @@
+/node_modules
+
+#variables de entorno
+server/config/.env
