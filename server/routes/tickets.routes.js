@@ -10,10 +10,13 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
     let desde = req.query.desde || 0;
     desde = Number(desde);
 
+    let limite = req.query.limite || 5
+    limite = Number(limite);
+
     Ticket.find({})
             .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
             .skip(desde)
-            .limit(10)
+            .limit(limite)
             .exec((err, ticket) =>{
                 if( err ){
                     return res.status(400).json({
