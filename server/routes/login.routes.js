@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const Usuario = require('../database/models/usuarios.model');
 const { verificarToken } = require('../auth/autenticacion');
 
+const { getMenu } = require('../helpers/menu-frontend');
+
 const app = express();
 
 app.get('/login/renew', verificarToken, (req,res)=>{
@@ -12,10 +14,13 @@ app.get('/login/renew', verificarToken, (req,res)=>{
         usuario:req.usuario
     }, process.env.SEED, {expiresIn:process.env.EXP});
 
+    
+
     res.json({
         ok:true,
         usuario:req.usuario,
-        token
+        token,
+        menu: getMenu(req.usuario.Role)
     });
 })
 
@@ -56,7 +61,8 @@ app.post('/login', (req,res)=>{
         res.json({
             ok:true,
             usuario:usuarioDB,
-            token
+            token,
+            menu:getMenu(usuarioDB.Role)
         });
     });
 
