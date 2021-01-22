@@ -33,12 +33,38 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
                         err
                     });
                 }
-
+            Ticket.countDocuments({estado:'ABIERTO'}, (err,abierto)=>{
+                if( err ){
+                    return res.status(400).json({
+                        ok:false,
+                        err
+                    });
+                }
+            Ticket.countDocuments({estado:'EJECUTANDOSE'}, (err, ejecutandose)=>{
+                if( err ){
+                    return res.status(400).json({
+                        ok:false,
+                        err
+                    });
+                }
+            Ticket.countDocuments({estado:'CERRADO'}, (err, cerrado)=>{
+                if( err ){
+                    return res.status(400).json({
+                        ok:false,
+                        err
+                    });
+                }
                 res.json({
                     ok:true,
                     ticket,
-                    total:conteo
+                    total:conteo,
+                    abierto,
+                    ejecutandose,
+                    cerrado
                 })
+            })
+            })
+            })
             });
 
             })
