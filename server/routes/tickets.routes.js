@@ -118,7 +118,7 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
             return res.status(400).json({
                 ok:false,
                 err:{
-                    message:'Usuario no encontrado'
+                    message:'Ticket no encontrado'
                 }
             });
         }
@@ -131,6 +131,40 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
     });
 });
 
+app.get('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
+
+    let id = req.params.id;
+
+    Ticket.findById(id, (err, ticketDB) => {
+        if( err ){
+            return res.status(401).json({
+                ok:false,
+                err
+            });
+        }
+
+    if( err ){
+        return res.status(401).json({
+            ok:false,
+            err
+        });
+    }
+
+    if(!ticketDB){
+        return res.status(400).json({
+            ok:false,
+            err:{
+                message:'ticket no encontrado'
+            }
+        });
+    }
+
+    res.json({
+        ok:true,
+        ticket:ticketDB
+    });
+    });
+});
 
 
 module.exports = app;
