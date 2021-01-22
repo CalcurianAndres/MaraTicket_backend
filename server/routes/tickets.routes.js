@@ -135,7 +135,9 @@ app.get('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
 
     let id = req.params.id;
 
-    Ticket.findById(id, (err, ticketDB) => {
+    Ticket.findById(id)
+    .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
+    .exec((err, ticketDB) => {
         if( err ){
             return res.status(401).json({
                 ok:false,
