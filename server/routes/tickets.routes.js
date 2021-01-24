@@ -148,11 +148,12 @@ app.post('/api/ticket/:id', async (req,res)=>{
                 ok:false,
                 err
             });
-        }
 
-        const comentario = ticket.comentarios;
+        }
         
-        if(comentario.length <= 0){
+        const comentary = ticket.comentarios;
+        
+        if(comentary.length <= 0){
             
             let comentarios = new Comentario({
                 comentarios:[{
@@ -182,16 +183,15 @@ app.post('/api/ticket/:id', async (req,res)=>{
                 });
             });
         }else{
-            Comentario.find({}, (err, comentario)=>{
-                if( err ){
-                    return res.status(401).json({
-                        ok:false,
-                        err
-                    });
-                }
-            Comentario.findOneAndUpdate({_id:comentario}, 
-                {$push:{comentarios:[{usuario:body.dueno, mensaje:body.mensaje}]}},
-                {new:true, runValidators:true},(err, comentario2)=>{
+            // Comentario.find({}, (err, comentarios)=>{
+            //      if( err ){
+            //         return res.status(401).json({
+            //             ok:false,
+            //              err
+            //          });
+            //      }
+            Comentario.findByIdAndUpdate(comentary, {$push:{comentarios:[{usuario:body.dueno, mensaje:body.mensaje}]}}, {new:true, runValidators:true},
+                (err, coment)=>{
                 if( err ){
                     return res.status(401).json({
                         ok:false,
@@ -199,10 +199,10 @@ app.post('/api/ticket/:id', async (req,res)=>{
                     });
                 }
 
-                res.json(comentario2);
-            });
+                res.json(coment)
+            })
 
-            });
+        //  });
 
         }
     });
