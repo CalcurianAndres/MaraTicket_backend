@@ -1,7 +1,13 @@
 const express = require('express');
+var exec = require('child_process').exec;
+
 const Ticket = require('../database/models/ticket.model');
+const Comentario = require('../database/models/comentarios.model');
+const usuario = require('../database/models/usuarios.model');
+
 const { verificarToken, verificar_Role } = require('../auth/autenticacion');
 const { enviarEmail } = require('../middlewares/email');
+
 
 const app = express();
 
@@ -14,7 +20,8 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
     limite = Number(limite);
 
     Ticket.find({})
-            .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
+            // .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
+            .populate({path:'usuario',})
             .skip(desde)
             .limit(limite)
             .exec((err, ticket) =>{
@@ -65,9 +72,8 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
             })
             })
             })
-            });
-
-            })
+        });
+    });
 });
 
 app.post('/api/ticket', verificarToken, (req, res) => {
@@ -131,12 +137,85 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
     });
 });
 
+app.post('/api/ticket/:id', async (req,res)=>{
+
+    let id = req.params.id;
+    let body = req.body;
+
+    Ticket.findById(id, (err, ticket)=>{
+        if( err ){
+            return res.status(401).json({
+                ok:false,
+                err
+            });
+        }
+
+        const comentario = ticket.comentarios;
+        
+        if(comentario.length <= 0){
+            
+            let comentarios = new Comentario({
+                comentarios:[{
+                    usuario:body.dueno,
+                    mensaje:body.mensaje
+                }]
+            });
+
+            comentarios.save(async(err, comentario)=>{
+                if( err ){
+                    return res.status(401).json({
+                        ok:false,
+                        err
+                    });
+                }
+
+                const update = {comentarios:comentario._id};
+                await Ticket.findByIdAndUpdate(id, update, {new:true, runValidators:true}, (err, ticketDB)=>{
+                    if( err ){
+                        return res.status(401).json({
+                            ok:false,
+                            err
+                        });
+                    }
+
+                    res.json(ticketDB);
+                });
+            });
+        }else{
+            Comentario.find({}, (err, comentario)=>{
+                if( err ){
+                    return res.status(401).json({
+                        ok:false,
+                        err
+                    });
+                }
+            Comentario.findOneAndUpdate({_id:comentario}, 
+                {$push:{comentarios:[{usuario:body.dueno, mensaje:body.mensaje}]}},
+                {new:true, runValidators:true},(err, comentario2)=>{
+                if( err ){
+                    return res.status(401).json({
+                        ok:false,
+                        err
+                    });
+                }
+
+                res.json(comentario2);
+            });
+
+            });
+
+        }
+    });
+
+});
+
 app.get('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
 
     let id = req.params.id;
 
     Ticket.findById(id)
     .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
+    .populate({path:'comentarios', populate:{path:'comentarios.usuario'}})
     .exec((err, ticketDB) => {
         if( err ){
             return res.status(401).json({
@@ -168,5 +247,43 @@ app.get('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
     });
 });
 
+app.get('/api/ping', async(req, res)=>{
+    // var hosts = ['8.8.8.8'];
+  
+    // var cfg = {
+    //     timeout: 10,
+    //     // WARNING: -i 2 may not work in other platform like window
+    //     extra: ['-n', '4'],
+    // };
+    
+    // hosts.forEach(function(host){
+    //     ping.sys.probe(host, function(isAlive){
+    //         var msg = isAlive ? 'host ' + host + ' is alive' : 'host ' + host + ' is dead';
+    //         console.log(msg);
+    //         res.json(msg);
+    //     }, cfg);
+    // });
+
+    var pingCmd = "ping 192.168.0.250";
+    var result = '';
+
+    function puts(error, stdout, stderr) {
+    if (error) {
+    res.json(stdout)
+    console.log("error", "Error connecting");
+    result = "Failed";
+    console.log(result)
+    }
+    else {
+    res.json(stdout)
+    result = "Success"
+    console.log(result)
+    }
+
+    
+}
+exec(pingCmd, puts);
+
+});
 
 module.exports = app;

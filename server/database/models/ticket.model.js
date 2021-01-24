@@ -30,7 +30,17 @@ let TicketSchema = new Schema({
             type:Schema.Types.ObjectId,
             ref: 'usuario'
         }
-    ]
+    ],
+    comentarios: [
+        {
+            type:Schema.Types.ObjectId,
+            ref: 'comentario'
+        }
+    ],
+    fecha: {
+        type:Date,
+        default:Date.now
+    }
 
 
 });
