@@ -13,6 +13,9 @@ app.use(bodyParser.json());
 
 app.use(cors())
 
+app.use(express.static(__dirname + '/public'));
+
+
 //rutas
 app.use ( require('./routes/index.routes'));
 

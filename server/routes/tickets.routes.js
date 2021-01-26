@@ -112,6 +112,16 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
     let id = req.params.id;
     let body = req.body;
 
+    if(body.estado){
+        console.log('se cambio el estado')
+    }
+    if(body.departamento){
+        console.log('Se cambio departamento')
+    }
+    if(body.tomado){
+        console.log('el ticket fue tomado por:')
+    }
+
     Ticket.findByIdAndUpdate(id, body,{new:true, runValidators:true}, (err, ticketDB) => {
         if( err ){
             return res.status(401).json({
@@ -183,13 +193,6 @@ app.post('/api/ticket/:id', async (req,res)=>{
                 });
             });
         }else{
-            // Comentario.find({}, (err, comentarios)=>{
-            //      if( err ){
-            //         return res.status(401).json({
-            //             ok:false,
-            //              err
-            //          });
-            //      }
             Comentario.findByIdAndUpdate(comentary, {$push:{comentarios:[{usuario:body.dueno, mensaje:body.mensaje}]}}, {new:true, runValidators:true},
                 (err, coment)=>{
                 if( err ){
@@ -201,9 +204,6 @@ app.post('/api/ticket/:id', async (req,res)=>{
 
                 res.json(coment)
             })
-
-        //  });
-
         }
     });
 
