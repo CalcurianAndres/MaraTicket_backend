@@ -248,22 +248,7 @@ app.get('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
 });
 
 app.get('/api/ping', async(req, res)=>{
-    // var hosts = ['8.8.8.8'];
-  
-    // var cfg = {
-    //     timeout: 10,
-    //     // WARNING: -i 2 may not work in other platform like window
-    //     extra: ['-n', '4'],
-    // };
     
-    // hosts.forEach(function(host){
-    //     ping.sys.probe(host, function(isAlive){
-    //         var msg = isAlive ? 'host ' + host + ' is alive' : 'host ' + host + ' is dead';
-    //         console.log(msg);
-    //         res.json(msg);
-    //     }, cfg);
-    // });
-
     var pingCmd = "ping 192.168.0.250";
     var result = '';
 
