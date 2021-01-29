@@ -264,7 +264,7 @@ app.post('/api/ticket/:id', async (req,res)=>{
 
 // [verificarToken, verificar_Role]
 
-app.get('/api/ticket/:id',  (req, res) => {
+app.get('/api/ticket/:id',verificarToken,  (req, res) => {
 
     let id = req.params.id;
 
