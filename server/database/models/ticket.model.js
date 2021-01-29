@@ -37,6 +37,12 @@ let TicketSchema = new Schema({
             ref: 'comentario'
         }
     ],
+    notificaciones:[
+        {
+            type:Schema.Types.ObjectId,
+            ref: 'notificacion'
+        }
+    ],
     fecha: {
         type:Date,
         default:Date.now

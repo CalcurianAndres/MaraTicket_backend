@@ -3,7 +3,7 @@ var exec = require('child_process').exec;
 
 const Ticket = require('../database/models/ticket.model');
 const Comentario = require('../database/models/comentarios.model');
-const usuario = require('../database/models/usuarios.model');
+const Notificacion = require('../database/models/notificaciones.model');
 
 const { verificarToken, verificar_Role } = require('../auth/autenticacion');
 const { enviarEmail } = require('../middlewares/email');
@@ -20,8 +20,8 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
     limite = Number(limite);
 
     Ticket.find({})
-            // .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
-            .populate({path:'usuario',})
+            .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
+            .where('estado').ne('CERRADO')
             .skip(desde)
             .limit(limite)
             .exec((err, ticket) =>{
@@ -112,24 +112,14 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
     let id = req.params.id;
     let body = req.body;
 
-    if(body.estado){
-        console.log('se cambio el estado')
-    }
-    if(body.departamento){
-        console.log('Se cambio departamento')
-    }
-    if(body.tomado){
-        console.log('el ticket fue tomado por:')
-    }
-
-    Ticket.findByIdAndUpdate(id, body,{new:true, runValidators:true}, (err, ticketDB) => {
+    Ticket.findById(id, (err, ticketDB) =>{
         if( err ){
             return res.status(401).json({
                 ok:false,
                 err
             });
         }
-    
+
         if(!ticketDB){
             return res.status(400).json({
                 ok:false,
@@ -139,10 +129,73 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
             });
         }
 
-        res.json({
-            ok:true,
-            ticket:ticketDB
-        });
+        if(ticketDB.estado != body.estado){
+            body.tipo = `cambió de estado a ${body.estado}`;
+        }
+
+        const Noti = ticketDB.notificaciones;
+        if(Noti.length <= 0){
+
+            let notificacion = new Notificacion({
+                notificacion:[{
+                    usuario:body.usuario,
+                    tipo:body.tipo,
+                    mensaje:body.mensaje
+                }]
+            });
+
+            notificacion.save(async(err, notificacion)=>{
+                if( err ){
+                    return res.status(401).json({
+                        ok:false,
+                        err
+                    });
+                }
+
+                const update = {estado:body.estado,notificaciones:notificacion._id};
+
+                await Ticket.findByIdAndUpdate(id, update, {new:true, runValidators:true}, (err, ticketDB)=>{
+                    if( err ){
+                        return res.status(401).json({
+                            ok:false,
+                            err
+                        });
+                    }
+
+                    res.json(ticketDB);
+                });
+
+            })
+
+        }else{
+            Ticket.findByIdAndUpdate(id, {estado:body.estado},{new:true, runValidators:true}, (err,ticketDB)=>{
+                if( err ){
+                    return res.status(401).json({
+                        ok:false,
+                        err
+                    });
+                }
+
+                console.log(ticketDB);
+            });
+            Notificacion.findByIdAndUpdate(Noti,{
+                $push:{notificacion:[{usuario:body.usuario, tipo:body.tipo, mensaje:body.mensaje}]}}
+                , {new:true, runValidators:true},
+                (err, Noti) =>{
+                    if( err ){
+                        return res.status(401).json({
+                            ok:false,
+                            err
+                        });
+            
+                    }
+
+                    res.json(Noti)
+
+
+            });
+        }
+
 
     });
 });
@@ -209,13 +262,16 @@ app.post('/api/ticket/:id', async (req,res)=>{
 
 });
 
-app.get('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
+// [verificarToken, verificar_Role]
+
+app.get('/api/ticket/:id',  (req, res) => {
 
     let id = req.params.id;
 
     Ticket.findById(id)
     .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
-    .populate({path:'comentarios', populate:{path:'comentarios.usuario'}})
+    .populate({path:'comentarios', populate:{path:'comentarios.usuario', select:'Nombre Apellido img'}})
+    .populate({path:'notificaciones', populate:{path: 'notificacion.usuario', select:'Nombre Apellido'}})
     .exec((err, ticketDB) => {
         if( err ){
             return res.status(401).json({

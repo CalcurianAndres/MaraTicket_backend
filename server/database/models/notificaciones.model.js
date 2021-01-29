@@ -13,6 +13,10 @@ let NotificacionesSchema = new Schema([{
                 type:Schema.Types.ObjectId,
                 ref: 'usuario'
             },
+            tipo: {
+                type:String,
+                required:true
+            },
             mensaje: {
                 type:String,
                 required: true
