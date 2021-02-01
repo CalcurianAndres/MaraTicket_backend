@@ -9,6 +9,7 @@ app.use ( require('./usuarios.routes'));
 app.use ( require('./login.routes'));
 app.use ( require('./upload.routes'));
 app.use ( require('./imagenes.routes'));
+app.use (require('./estadistica.routes'));
 
 
 
