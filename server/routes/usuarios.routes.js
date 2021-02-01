@@ -14,6 +14,7 @@ app.get('/api/usuarios', verificarToken, (req, res)=>{
     limite = Number(limite);
 
     Usuario.find({estado:true})
+            .sort({Role:1})
             .skip(desde)
             .limit(limite)
             .exec((err, usuarios)=>{

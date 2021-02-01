@@ -42,6 +42,10 @@ let usuariosSchema = new Schema({
     estado:{
         type:Boolean,
         default:true
+    },
+    Departamento:{
+        type:String,
+        default:'soporte'
     }
 
 });

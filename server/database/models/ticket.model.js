@@ -25,6 +25,10 @@ let TicketSchema = new Schema({
         default: 'ABIERTO',
         enum: estadosValidos
     },
+    departamento:{
+        type:String,
+        default: 'soporte',
+    },
     usuario: [
         {
             type:Schema.Types.ObjectId,

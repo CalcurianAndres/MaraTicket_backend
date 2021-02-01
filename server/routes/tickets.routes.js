@@ -19,7 +19,9 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
     let limite = req.query.limite || 5
     limite = Number(limite);
 
-    Ticket.find({})
+    const departamento = req.query.departamento || '';
+
+    Ticket.find({'departamento':departamento})
             .populate('usuario', 'Nombre Apellido Correo AnyDesk img')
             .where('estado').ne('CERRADO')
             .skip(desde)
@@ -32,7 +34,7 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
                     });
                 }
         
-            Ticket.countDocuments({}, (err,conteo)=>{
+            Ticket.countDocuments({'departamento':departamento, 'departamento':departamento}, (err,conteo)=>{
 
                 if( err ){
                     return res.status(400).json({
@@ -40,21 +42,21 @@ app.get('/api/tickets', [verificarToken, verificar_Role], (req, res) => {
                         err
                     });
                 }
-            Ticket.countDocuments({estado:'ABIERTO'}, (err,abierto)=>{
+            Ticket.countDocuments({estado:'ABIERTO', 'departamento':departamento}, (err,abierto)=>{
                 if( err ){
                     return res.status(400).json({
                         ok:false,
                         err
                     });
                 }
-            Ticket.countDocuments({estado:'EJECUTANDOSE'}, (err, ejecutandose)=>{
+            Ticket.countDocuments({estado:'EJECUTANDOSE', 'departamento':departamento}, (err, ejecutandose)=>{
                 if( err ){
                     return res.status(400).json({
                         ok:false,
                         err
                     });
                 }
-            Ticket.countDocuments({estado:'CERRADO'}, (err, cerrado)=>{
+            Ticket.countDocuments({estado:'CERRADO', 'departamento':departamento}, (err, cerrado)=>{
                 if( err ){
                     return res.status(400).json({
                         ok:false,
@@ -83,6 +85,7 @@ app.post('/api/ticket', verificarToken, (req, res) => {
     let ticket = new Ticket({
         titulo: body.Titulo,
         descripcion: body.Descripcion,
+        departamento:body.Departamento,
         estado: body.estado,
         usuario: req.usuario._id
     });
@@ -129,8 +132,14 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
             });
         }
 
-        if(ticketDB.estado != body.estado){
+        if(ticketDB.estado != body.estado && ticketDB.departamento === body.departamento){
             body.tipo = `cambió de estado a ${body.estado}`;
+        }else if(ticketDB.departamento != body.departamento && ticketDB.estado === body.estado){
+            body.tipo = `cambió de departamento a ${body.departamento}`;
+        }else if(ticketDB.estado != body.estado && ticketDB.departamento != body.departamento){
+            body.tipo = `cambió de departamento a ${body.departamento} y cambió de estado a ${body.estado}`;
+        }else{
+            return res.json(ticketDB)
         }
 
         const Noti = ticketDB.notificaciones;
@@ -152,7 +161,7 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
                     });
                 }
 
-                const update = {estado:body.estado,notificaciones:notificacion._id};
+                const update = {estado:body.estado,departamento:body.departamento,notificaciones:notificacion._id};
 
                 await Ticket.findByIdAndUpdate(id, update, {new:true, runValidators:true}, (err, ticketDB)=>{
                     if( err ){
@@ -168,15 +177,13 @@ app.put('/api/ticket/:id', [verificarToken, verificar_Role], (req, res) => {
             })
 
         }else{
-            Ticket.findByIdAndUpdate(id, {estado:body.estado},{new:true, runValidators:true}, (err,ticketDB)=>{
+            Ticket.findByIdAndUpdate(id, {estado:body.estado,departamento:body.departamento},{new:true, runValidators:true}, (err,ticketDB)=>{
                 if( err ){
                     return res.status(401).json({
                         ok:false,
                         err
                     });
                 }
-
-                console.log(ticketDB);
             });
             Notificacion.findByIdAndUpdate(Noti,{
                 $push:{notificacion:[{usuario:body.usuario, tipo:body.tipo, mensaje:body.mensaje}]}}
