@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const Usuario = require('../database/models/usuarios.model');
+const Ticket = require('../database/models/ticket.model');
 const { verificarToken, verificar_Role } = require('../auth/autenticacion');
 
 const app = express();
@@ -125,10 +126,63 @@ app.delete('/api/usuario/:id', [verificarToken, verificar_Role], (req, res)=>{
             usuario:usuarioBorrado
         });
     });
-
 });
 
+app.get('api/perfil/:id', verificarToken, (req, res)=>{
+    let id = req.params.id;
 
+    Ticket.find({usuario:id}, (err, ticketDB)=>{
+        if( err ){
+            return res.status(400).json({
+                ok:false,
+                err
+            });
+        }
+
+        if(!ticketDB){
+            return res.status(400).json({
+                ok:false,
+                err:{
+                    message: 'Usuario no ha generado ticket'
+                }
+            });
+        }
+
+        Ticket.countDocuments({estado:'ABIERTO', usuario:id}, (err, abiertos)=>{
+            if( err ){
+                return res.status(400).json({
+                    ok:false,
+                    err
+                });
+            }
+            Ticket.countDocuments({estado:'EJECUTANDOSE', usuario:id}, (err, ejecutandose)=>{
+                if( err ){
+                    return res.status(400).json({
+                        ok:false,
+                        err
+                    });
+                }
+                Ticket.countDocuments({estado:'CERRADO', usuario:id}, (err, cerrados)=>{
+                    if( err ){
+                        return res.status(400).json({
+                            ok:false,
+                            err
+                        });
+                    }
+                    res.json({
+                        ok:true,
+                        tickets:ticketDB,
+                        abiertos,
+                        ejecutandose,
+                        cerrados
+                    })
+                })
+            })
+        })
+
+        
+    })
+})
 
 
 

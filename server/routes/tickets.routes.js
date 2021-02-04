@@ -312,7 +312,7 @@ app.get('/api/ticket/:id',verificarToken,  (req, res) => {
 
 app.get('/api/ping', async(req, res)=>{
     
-    var pingCmd = "ping 192.168.0.250";
+    var pingCmd = "ping 8.8.8.8";
     var result = '';
 
     function puts(error, stdout, stderr) {
