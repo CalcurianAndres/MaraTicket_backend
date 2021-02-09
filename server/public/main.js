@@ -7,7 +7,11 @@
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+<<<<<<< HEAD
 module.exports = __webpack_require__(/*! E:\Users\Calcurian\Desktop\MaraTicket_frontend\src\main.ts */"zUnb");
+=======
+module.exports = __webpack_require__(/*! C:\Users\Soporte.TG\Desktop\MaraTicket_frontend\src\main.ts */"zUnb");
+>>>>>>> 09bde4bf99e641d6f264825a05a4114e1b119fd3
 
 
 /***/ }),
@@ -467,8 +471,13 @@ __webpack_require__.r(__webpack_exports__);
 // The list of file replacements can be found in `angular.json`.
 const environment = {
     production: false,
+<<<<<<< HEAD
     base_url: 'http://192.168.42.2:8080/api',
     login_url: 'http://192.168.42.2:8080/login'
+=======
+    base_url: 'http://192.168.1.142:8080/api',
+    login_url: 'http://192.168.1.142:8080/login'
+>>>>>>> 09bde4bf99e641d6f264825a05a4114e1b119fd3
 };
 /*
  * For easier debugging in development mode, you can import the following file
@@ -3428,10 +3437,17 @@ class BreadcrumbsComponent {
             .subscribe(data => {
             this.titulo = data.titulo;
             if (this.titulo) {
+<<<<<<< HEAD
                 document.title = `Mara Ticket - ${data.titulo}`;
             }
             else {
                 document.title = `Mara Ticket`;
+=======
+                document.title = `Soporte Técnico | ${data.titulo}`;
+            }
+            else {
+                document.title = `Soporte Técnico`;
+>>>>>>> 09bde4bf99e641d6f264825a05a4114e1b119fd3
             }
         });
     }

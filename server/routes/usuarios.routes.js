@@ -126,9 +126,9 @@ app.delete('/api/usuario/:id', [verificarToken, verificar_Role], (req, res)=>{
             usuario:usuarioBorrado
         });
     });
-
 });
 
+<<<<<<< HEAD
 app.get('/api/perfil/:id', verificarToken, (req, res) => {
 
     let id = req.params.id;
@@ -178,7 +178,63 @@ app.get('/api/perfil/:id', verificarToken, (req, res) => {
     });
 
 })
+=======
+app.get('api/perfil/:id', verificarToken, (req, res)=>{
+    let id = req.params.id;
+>>>>>>> 09bde4bf99e641d6f264825a05a4114e1b119fd3
 
+    Ticket.find({usuario:id}, (err, ticketDB)=>{
+        if( err ){
+            return res.status(400).json({
+                ok:false,
+                err
+            });
+        }
+
+        if(!ticketDB){
+            return res.status(400).json({
+                ok:false,
+                err:{
+                    message: 'Usuario no ha generado ticket'
+                }
+            });
+        }
+
+        Ticket.countDocuments({estado:'ABIERTO', usuario:id}, (err, abiertos)=>{
+            if( err ){
+                return res.status(400).json({
+                    ok:false,
+                    err
+                });
+            }
+            Ticket.countDocuments({estado:'EJECUTANDOSE', usuario:id}, (err, ejecutandose)=>{
+                if( err ){
+                    return res.status(400).json({
+                        ok:false,
+                        err
+                    });
+                }
+                Ticket.countDocuments({estado:'CERRADO', usuario:id}, (err, cerrados)=>{
+                    if( err ){
+                        return res.status(400).json({
+                            ok:false,
+                            err
+                        });
+                    }
+                    res.json({
+                        ok:true,
+                        tickets:ticketDB,
+                        abiertos,
+                        ejecutandose,
+                        cerrados
+                    })
+                })
+            })
+        })
+
+        
+    })
+})
 
 
 

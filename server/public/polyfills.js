@@ -7,7 +7,11 @@
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+<<<<<<< HEAD
 module.exports = __webpack_require__(/*! E:\Users\Calcurian\Desktop\MaraTicket_frontend\src\polyfills.ts */"hN/g");
+=======
+module.exports = __webpack_require__(/*! C:\Users\Soporte.TG\Desktop\MaraTicket_frontend\src\polyfills.ts */"hN/g");
+>>>>>>> 09bde4bf99e641d6f264825a05a4114e1b119fd3
 
 
 /***/ }),
