@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const Usuario = require('../database/models/usuarios.model');
+const Ticket = require('../database/models/ticket.model');
 const { verificarToken, verificar_Role } = require('../auth/autenticacion');
 
 const app = express();
@@ -128,6 +129,55 @@ app.delete('/api/usuario/:id', [verificarToken, verificar_Role], (req, res)=>{
 
 });
 
+app.get('/api/perfil/:id', verificarToken, (req, res) => {
+
+    let id = req.params.id;
+
+    Ticket.find({usuario:id}, (err,Total)=>{
+
+        if( err ){
+            return res.status(400).json({
+                ok:false,
+                err
+            });
+        }
+        Ticket.countDocuments({usuario:id,estado:'ABIERTO'}, (err,Abiertos)=>{
+    
+            if( err ){
+                return res.status(400).json({
+                    ok:false,
+                    err
+                });
+            }
+            Ticket.countDocuments({usuario:id,estado:'EJECUTANDOSE'}, (err,Ejecutandose)=>{
+        
+                if( err ){
+                    return res.status(400).json({
+                        ok:false,
+                        err
+                    });
+                }
+                Ticket.countDocuments({usuario:id,estado:'CERRADO'}, (err,Cerrados)=>{
+            
+                    if( err ){
+                        return res.status(400).json({
+                            ok:false,
+                            err
+                        });
+                    }
+                    res.json({
+                        ok:true,
+                        Total,
+                        Abiertos,
+                        Ejecutandose,
+                        Cerrados
+                    });
+                });
+            });
+        });
+    });
+
+})
 
 
 
